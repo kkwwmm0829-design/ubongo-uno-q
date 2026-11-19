@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>내 교구</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#E7EAF0;--card:#fff;--pill:#D5DBE7;--t:#5C6E93;--ink:#3A4663;
+  --A:#E05A5A;--B:#E8C547;--C:#5CB57A;--D:#4F86D9}
+*{box-sizing:border-box}
+body{margin:0;font-family:Jua,"Malgun Gothic",sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.card{background:var(--card);border-radius:28px;padding:32px 40px;max-width:980px;width:100%;box-shadow:0 8px 30px rgba(60,70,100,.12)}
+h1{font-size:2.2rem;margin:0 0 6px;color:var(--t);text-align:center}
+.sub{text-align:center;color:#7A849E;margin:0 0 22px;font-size:1.2rem}
+.conn{position:fixed;top:16px;left:18px;font-size:1rem;color:#9aa3b8}
+.board{display:flex;gap:70px;justify-content:center;align-items:center;margin:10px 0 20px}
+.joy{display:grid;grid-template-columns:90px 90px 90px;grid-template-rows:90px 90px 90px;gap:8px}
+.k{border-radius:18px;background:var(--pill);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:2.2rem;color:var(--t);transition:transform .08s,filter .08s}
+.k small{font-size:.95rem;color:#7A849E;margin-top:2px}
+.k.on{transform:scale(1.12);filter:brightness(1.15);box-shadow:0 0 0 5px rgba(92,110,147,.25)}
+.k.done{outline:4px solid #4C9A6A}
+.stick{background:#3A4663;border-radius:50%;width:56px;height:56px;margin:auto}
+.btns{display:grid;grid-template-columns:110px 110px;gap:18px}
+.btns .k{border-radius:50%;width:110px;height:110px;color:#fff;font-size:2rem}
+.last{text-align:center;font-size:1.6rem;min-height:1.4em;color:var(--t)}
+.row{display:flex;gap:12px;justify-content:center;margin-top:18px}
+button{font-family:inherit;font-size:1.1rem;border:0;border-radius:999px;padding:12px 26px;background:var(--t);color:#fff;cursor:pointer}
+.msg{text-align:center;color:#7A849E;margin-top:10px;min-height:1.3em}
+</style></head><body>
+<div class="conn" id="conn">연결 중…</div>
+<div class="card" id="app">
+  <div id="screen"></div>
+</div>
+
+<script src="libs/socket.io.min.js"></script>
+<script src="libs/arduino.js"></script>
+<script src="app.js"></script>
+</body></html>

@@ -1,0 +1,6 @@
+name: 내 교구 뼈대
+icon: 🧩
+description: 버튼 4개 + 조이스틱 + 노트북 화면 + 영수증 프린터. 처음엔 배선 점검판, 여기에 내 교구를 만듭니다.
+
+bricks:
+  - arduino:web_ui
