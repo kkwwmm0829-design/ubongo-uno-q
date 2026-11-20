@@ -3,70 +3,114 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>평면 우봉고</title>
+<title>도형의 이동 · 평면 우봉고</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
 <style>
-/* VOICE: 체험관 교구를 손에 쥔 휴대용 게임기처럼, 초등 4학년 눈높이
-   IDEA: 휴대용 게임기 — 위는 화면(판), 아래는 십자 버튼과 A·B·C·D
-   PICTURE: 모래색 우봉고 판과 원색 조각이 화면 위쪽을 채움
-   COLOUR and TYPE: 청록 케이스, 모래색 판, 노랑·빨강·파랑·초록 조각 / Jua + Noto Sans KR
-   LAYOUT: 세로 한 화면 — 상태줄, 판, 조각 상자, 조작판 */
+/* 도형의 이동(밀기·돌리기·뒤집기)을 알아보고, 우봉고 퍼즐로 도전하는 휴대용 게임기 */
 :root{color-scheme:light dark;
  --case:light-dark(#0d5c63,#08343a);--case2:light-dark(#0a4a50,#052529);
  --screen:light-dark(#fbf7ee,#14232a);--ink:light-dark(#1b2a2f,#eef4f2);--mute:light-dark(#5a6b70,#9fb3b5);
  --sand:light-dark(#ecd9ad,#5a4b2c);--sandline:light-dark(#c9b07a,#7d6a40);--tile:light-dark(#fff,#1d3038);
+ --okbg:light-dark(#DDF1E3,#1f3d2a);--nobg:light-dark(#FBE0E0,#4a2626);
  --A:#F2C230;--B:#E05A5A;--C:#4F86D9;--D:#4FB273}
-:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;min-width:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
 body{margin:0;background:var(--case2);color:var(--ink);font:16px/1.45 "Noto Sans KR",system-ui,sans-serif;overflow-x:clip;touch-action:manipulation;user-select:none;-webkit-user-select:none}
 .dev{max-width:520px;margin:0 auto;min-height:100%;background:var(--case);display:flex;flex-direction:column;gap:10px;
  padding:max(10px,env(safe-area-inset-top)) 12px max(14px,env(safe-area-inset-bottom))}
-.top{display:flex;align-items:center;gap:10px;color:#fff}
-.top h1{font:400 26px/1.05 Jua,sans-serif;margin:0;flex:1}
-.chip{font:400 16px Jua,sans-serif;background:rgba(255,255,255,.16);padding:5px 12px;border-radius:999px;white-space:nowrap}
+.top{display:flex;align-items:center;gap:8px;color:#fff}
+.top h1{font:400 24px/1.05 Jua,sans-serif;margin:0;flex:1}
+.homeb{border:0;background:rgba(255,255,255,.16);color:#fff;font:400 15px Jua,sans-serif;border-radius:999px;padding:6px 12px;cursor:pointer}
+.homeb[hidden]{display:none}
+.chip{font:400 15px Jua,sans-serif;background:rgba(255,255,255,.16);padding:5px 12px;border-radius:999px;white-space:nowrap}
 .scr{background:var(--screen);border-radius:20px;border:5px solid #062f33;box-shadow:0 6px 0 #062f33;padding:12px;flex:1;display:flex;flex-direction:column;gap:10px;position:relative;min-height:0}
 .hint{font:400 17px/1.3 Jua,sans-serif;text-align:center;min-height:1.3em}
 .note{text-align:center;font-weight:700;font-size:14px;min-height:1.4em;color:#C23B3B}.note.good{color:#2F7D4A}
-/* home */
-.boards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.bc{border:4px solid transparent;border-radius:14px;background:var(--tile);padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:5px;font:400 17px Jua,sans-serif;box-shadow:0 2px 0 rgba(0,0,0,.1);cursor:pointer}
-.bc.sel{border-color:var(--ink)}
-.bc small{font:400 12px "Noto Sans KR";color:var(--mute);text-align:center}
-.res{font:700 12px "Noto Sans KR";border-radius:999px;padding:2px 9px}
-.res.ok{background:#DDF1E3;color:#2F7D4A}.res.no{background:#FBE0E0;color:#C23B3B}.res.yet{color:var(--mute)}
-.mini{display:grid;gap:2px}.mini i{width:var(--m);height:var(--m);border-radius:3px}
-.mini i.on{background:var(--sand);outline:1px solid var(--sandline)}
-/* play */
-.timer{display:flex;align-items:center;gap:10px}
-.bar{flex:1;height:14px;border-radius:999px;background:light-dark(#e3ddd0,#22353d);overflow:hidden}
-.bar i{display:block;height:100%;background:var(--D);transition:width .1s linear}
-.sec{font:400 26px/1 Jua,sans-serif;min-width:2.6em;text-align:right}
-.low .bar i{background:var(--B)}.low .sec{color:var(--B)}
+.tip{font-size:13px;color:var(--mute);text-align:center}
+/* 메뉴 */
+.menu{display:flex;flex-direction:column;gap:12px;justify-content:center;flex:1}
+.ttl{text-align:center}.ttl h2{font:400 30px/1.1 Jua,sans-serif;margin:0}.ttl p{margin:4px 0 0;color:var(--mute);font-size:14px}
+.big{border:3px solid transparent;border-radius:18px;padding:14px;display:flex;align-items:center;gap:14px;text-align:left;background:var(--tile);box-shadow:0 4px 0 rgba(0,0,0,.15);font:inherit;color:var(--ink);cursor:pointer;width:100%}
+.big .k{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;font:400 24px Jua,sans-serif;background:var(--bc);color:#1b2a2f;flex:none}
+.big h3{margin:0;font:400 21px/1.2 Jua,sans-serif}.big p{margin:2px 0 0;font-size:13px;color:var(--mute)}
+.big .chk{margin-left:auto;font:700 12px "Noto Sans KR";border-radius:999px;padding:2px 9px;background:var(--okbg);color:#2F7D4A;white-space:nowrap}
+.big .ico{margin-left:auto;flex:none}
+.prog{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;font-size:13px}.prog span{background:var(--tile);border-radius:999px;padding:4px 10px;color:var(--mute)}.prog span.on{color:#2F7D4A;font-weight:700}
+/* 조각 그림 */
+.shp{position:relative;flex:none}
+.shp i{position:absolute;border-radius:4px;box-shadow:inset 0 -3px 0 rgba(0,0,0,.18),inset 0 2px 0 rgba(255,255,255,.35)}
+.anim{perspective:600px;display:grid;place-items:center}
+/* 퀴즈 */
+.dots{display:flex;gap:6px;justify-content:center}.dots i{width:10px;height:10px;border-radius:50%;background:var(--sandline);opacity:.35}.dots i.on{opacity:1;background:var(--D)}.dots i.cur{opacity:1;background:var(--ink)}
+.prompt{font:400 19px/1.35 Jua,sans-serif;text-align:center}.prompt b{font-weight:400;color:#0d7d86}
+.qrow{display:flex;align-items:center;justify-content:center;gap:14px;flex:1;min-height:0}
+.ob{display:flex;flex-direction:column;align-items:center;gap:6px;background:var(--sand);border-radius:16px;padding:14px;min-width:120px;min-height:120px;justify-content:center}
+.ob small{font-size:12px;color:var(--ink);opacity:.75}
+.op{font:400 30px/1 Jua,sans-serif;display:flex;flex-direction:column;align-items:center;gap:2px;color:#0d7d86}.op small{font:400 14px Jua,sans-serif}
+.choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.ch{border:3px solid transparent;border-radius:14px;background:var(--tile);padding:8px;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;min-height:86px;font:inherit;color:inherit;position:relative}
+.ch .k{position:absolute;left:6px;top:6px;width:24px;height:24px;border-radius:8px;display:grid;place-items:center;font:400 15px Jua,sans-serif;background:var(--bc);color:#1b2a2f}
+.ch.txt{font:400 20px Jua,sans-serif;min-height:64px}
+.ch.right{border-color:#2F7D4A;background:var(--okbg)}.ch.wrong{border-color:#C23B3B;background:var(--nobg)}
+.ch.flash{animation:fl .9s ease-out 2}
+@keyframes fl{50%{transform:scale(1.06)}}
+/* 밀기 판 · 게임 판 */
 .bw{display:flex;justify-content:center;align-items:center;flex:1;min-height:0}
 .grid{display:grid;gap:3px}
 .grid i{width:var(--c);height:var(--c);border-radius:7px;position:relative}
 .grid i.on{background:var(--sand);box-shadow:inset 0 0 0 2px var(--sandline)}
 .grid i.f{box-shadow:inset 0 -5px 0 rgba(0,0,0,.18),inset 0 3px 0 rgba(255,255,255,.35)}
+.grid i.t{outline:3px dashed var(--ink);outline-offset:-4px}
+.grid i.s::before{content:"";position:absolute;inset:4px;border-radius:5px;background:var(--pc);opacity:.28}
 .grid i.g::after{content:"";position:absolute;inset:0;border-radius:7px;background:var(--pc);opacity:.82;box-shadow:0 0 0 3px #1b2a2f,inset 0 3px 0 rgba(255,255,255,.4)}
 .grid i.g.bad::after{background:repeating-linear-gradient(45deg,var(--pc) 0 7px,#fff 7px 11px);box-shadow:0 0 0 3px var(--B)}
+.cnt{text-align:center;font:400 17px Jua,sans-serif}.cnt b{font-weight:400;color:#0d7d86}
+.legend{display:flex;gap:12px;justify-content:center;font-size:12px;color:var(--mute)}.legend span{display:flex;align-items:center;gap:4px}
+.legend i{width:14px;height:14px;border-radius:4px;display:inline-block}
+/* 정리 */
+.sumrow{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.sumrow>div{display:flex;flex-direction:column;align-items:center;gap:4px;background:var(--sand);border-radius:12px;padding:8px 5px;min-width:56px}
+.sumrow small{font:400 13px Jua,sans-serif}
+.pts{margin:0;padding:12px 14px 12px 30px;background:var(--tile);border-radius:14px;font-size:14px;display:flex;flex-direction:column;gap:6px}
+.pts b{color:#0d7d86}
+.score{text-align:center;font:400 22px Jua,sans-serif}.score b{font-weight:400;color:#2F7D4A;font-size:28px}
+/* 뒤집어 보기 */
+.tryrow{display:flex;align-items:center;justify-content:center;gap:10px;flex:1;min-height:0}
+.tryrow .ob{flex:1;max-width:190px}
+.tryrow .ob.tg{background:transparent;border:3px dashed var(--sandline)}
+/* 도전하기 판 고르기 */
+.boards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.bc{border:4px solid transparent;border-radius:14px;background:var(--tile);padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:5px;font:400 17px Jua,sans-serif;box-shadow:0 2px 0 rgba(0,0,0,.1);cursor:pointer}
+.bc.sel{border-color:var(--ink)}
+.bc small{font:400 12px "Noto Sans KR";color:var(--mute);text-align:center}
+.res{font:700 12px "Noto Sans KR";border-radius:999px;padding:2px 9px}
+.res.ok{background:var(--okbg);color:#2F7D4A}.res.no{background:var(--nobg);color:#C23B3B}.res.yet{color:var(--mute)}
+.mini{display:grid;gap:2px}.mini i{width:var(--m);height:var(--m);border-radius:3px}
+.mini i.on{background:var(--sand);outline:1px solid var(--sandline)}
+.timer{display:flex;align-items:center;gap:10px}
+.bar{flex:1;height:14px;border-radius:999px;background:light-dark(#e3ddd0,#22353d);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--D);transition:width .1s linear}
+.sec{font:400 26px/1 Jua,sans-serif;min-width:2.6em;text-align:right}
+.low .bar i{background:var(--B)}.low .sec{color:var(--B)}
 .tray{display:flex;gap:8px;overflow-x:auto;padding:2px}
 .pc{flex:1 0 74px;border:3px solid transparent;border-radius:14px;background:var(--tile);min-height:78px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:6px;cursor:pointer}
 .pc.act{border-color:var(--ink);border-style:dashed}.pc.done{opacity:.5}
 .pc small{font-size:11px;color:var(--mute)}
 .pc .mini i.p{border-radius:4px;box-shadow:inset 0 -2px 0 rgba(0,0,0,.18)}
-/* controls */
+.how{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;font-size:13px}.how span{background:var(--tile);border-radius:999px;padding:4px 10px}
+/* 조작판 */
 .ctl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:14px;align-items:center;padding:2px 2px 0}
-.pad{display:grid;grid-template-columns:repeat(3,52px);grid-template-rows:repeat(3,52px);gap:4px}
+.pad{display:grid;grid-template-columns:repeat(3,52px);grid-template-rows:repeat(3,52px);gap:4px;transition:opacity .2s}
 .pad button{border:0;border-radius:12px;background:#163a3f;color:#fff;font-size:20px;box-shadow:0 4px 0 #04211f;cursor:pointer}
 .pad .mid{grid-column:2;grid-row:2;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ff7a7a,#c62f2f);box-shadow:0 4px 0 #6d1414}
 .btns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
-.btn{border:0;border-radius:16px;min-height:72px;color:#1b2a2f;display:flex;flex-direction:column;align-items:center;justify-content:center;font:400 13px/1.2 Jua,sans-serif;box-shadow:0 5px 0 rgba(0,0,0,.35);background:var(--bc);cursor:pointer;padding:4px}
-.btn b{font:400 26px/1 Jua,sans-serif}
+.btn{border:0;border-radius:16px;min-height:72px;color:#1b2a2f;display:flex;flex-direction:column;align-items:center;justify-content:center;font:400 13px/1.2 Jua,sans-serif;box-shadow:0 5px 0 rgba(0,0,0,.35);background:var(--bc);cursor:pointer;padding:4px;transition:opacity .2s}
+.btn b{font:400 26px/1 Jua,sans-serif}.btn span{min-height:1.2em;text-align:center}
+.btn.off,.pad.off{opacity:.35}
 .btn:active,.pad button:active,.btn.hit,.pad button.hit{transform:translateY(4px);box-shadow:0 1px 0 rgba(0,0,0,.35)}
 button:focus-visible{outline:3px solid #fff;outline-offset:2px}
-/* overlay + cert */
+/* 오버레이 · 확인증 */
 .ov{position:absolute;inset:0;background:rgba(10,30,34,.6);display:flex;align-items:center;justify-content:center;border-radius:15px;padding:12px;z-index:3}
 .card{background:var(--screen);border-radius:20px;padding:20px 18px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;width:100%;max-width:380px;animation:pop .3s ease-out}
 .card h2{font:400 40px/1.05 Jua,sans-serif;margin:0}.card p{margin:0}
@@ -74,23 +118,22 @@ button:focus-visible{outline:3px solid #fff;outline-offset:2px}
 .cert{border:3px solid var(--case);outline:5px double var(--case);outline-offset:-11px;border-radius:14px;padding:18px 16px;background:#fff;color:#1b2a2f;display:flex;flex-direction:column;gap:8px}
 .cert .pl{color:#0d5c63;font-weight:700;font-size:13px}
 .cert h2{font:400 26px/1.1 Jua,sans-serif;margin:0}
-.cert .big{font:400 24px Jua,sans-serif}.cert .big b{font-weight:400;color:#0d5c63;font-size:32px}
+.cert .big2{font:400 24px Jua,sans-serif}.cert .big2 b{font-weight:400;color:#0d5c63;font-size:32px}
 .row{display:grid;grid-template-columns:52px minmax(0,1fr) auto;align-items:center;gap:8px;padding:4px 0;border-bottom:1px dashed #c9c2b3;font-size:14px}
 .row b{white-space:nowrap;color:#5a6b70}.row b.ok{color:#2F7D4A}
 .cert .mini i.on{background:#ecd9ad;outline-color:#c9b07a}
+.cert .lrn{font-size:13px;color:#2F7D4A;font-weight:700}
 .when{font-size:13px;color:#5a6b70;text-align:right}
-.tip{font-size:13px;color:var(--mute);text-align:center}
-.how{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;font-size:13px}.how span{background:var(--tile);border-radius:999px;padding:4px 10px}
-@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
 @media(max-width:360px){.pad{grid-template-columns:repeat(3,44px);grid-template-rows:repeat(3,44px)}.btn{min-height:62px}}
 </style>
 </head>
 <body>
 <div class="dev">
-  <div class="top"><h1>평면 우봉고</h1><span class="chip" id="stage">판 고르기</span></div>
+  <div class="top"><button type="button" class="homeb" id="homeb" hidden>⌂ 처음</button><h1>도형의 이동</h1><span class="chip" id="stage">처음 화면</span></div>
   <div class="scr" id="scr"></div>
   <div class="ctl" aria-label="조작판">
-    <div class="pad">
+    <div class="pad" id="pad">
       <button type="button" data-k="UP" style="grid-column:2;grid-row:1" aria-label="위로">▲</button>
       <button type="button" data-k="LEFT" style="grid-column:1;grid-row:2" aria-label="왼쪽">◀</button>
       <span class="mid"></span>
@@ -98,47 +141,344 @@ button:focus-visible{outline:3px solid #fff;outline-offset:2px}
       <button type="button" data-k="DOWN" style="grid-column:2;grid-row:3" aria-label="아래로">▼</button>
     </div>
     <div class="btns">
-      <button type="button" class="btn" data-k="A" style="--bc:var(--A)"><b>A</b>고르기</button>
-      <button type="button" class="btn" data-k="B" style="--bc:var(--B)"><b>B</b>90° 돌리기</button>
-      <button type="button" class="btn" data-k="C" style="--bc:var(--C)"><b>C</b>뒤집기</button>
-      <button type="button" class="btn" data-k="D" style="--bc:var(--D)"><b>D</b>놓기 · 다음</button>
+      <button type="button" class="btn" data-k="A" style="--bc:var(--A)"><b>A</b><span></span></button>
+      <button type="button" class="btn" data-k="B" style="--bc:var(--B)"><b>B</b><span></span></button>
+      <button type="button" class="btn" data-k="C" style="--bc:var(--C)"><b>C</b><span></span></button>
+      <button type="button" class="btn" data-k="D" style="--bc:var(--D)"><b>D</b><span></span></button>
     </div>
   </div>
 </div>
 <script>
 {
-const TIME = 60;
-const PLACE = '경남수학문화관 체험탐구관';
-const PUZ = [
+// ===== 선생님이 고치는 곳 =====
+const TIME = 60;                       // 도전하기 한 판 제한 시간(초)
+const PLACE = '경남수학문화관 체험탐구관'; // 확인증 기관 이름
+const PUZ = [                          // 도전하기 판 5개: 글자 하나가 조각 하나, . 은 빈칸
   { level: '쉬움',   map: ['.AA.', 'BBAC', 'BBCC', '..C.'] },
   { level: '쉬움',   map: ['AAA.', '.BAC', 'BBCC', 'B..C'] },
   { level: '보통',   map: ['AAAB', 'CADB', 'CCDB', '.DD.'] },
   { level: '보통',   map: ['AA...', 'AABCC', '.DBBC', 'DDDB.'] },
   { level: '어려움', map: ['AAA..', 'ABBBC', 'DDBCC', '.DDCC'] },
 ];
-const PC = { A: '#F2C230', B: '#E05A5A', C: '#4F86D9', D: '#4FB273' };
-const $ = (id) => document.getElementById(id);
-const scr = $('scr'), stageEl = $('stage');
+// 알아보기에서 쓰는 조각 (돌리거나 뒤집으면 모양이 달라 보이는 조각)
+const PIECES = [
+  { name: 'ㄴ자 조각', n: 4, color: '#F2C230', cells: [[0,0],[0,1],[0,2],[1,2]] },
+  { name: 'P자 조각',  n: 5, color: '#E05A5A', cells: [[0,0],[1,0],[0,1],[1,1],[0,2]] },
+  { name: 'N자 조각',  n: 5, color: '#4F86D9', cells: [[1,0],[1,1],[1,2],[0,2],[0,3]] },
+];
+// =============================
 
+const PC = { A: '#F2C230', B: '#E05A5A', C: '#4F86D9', D: '#4FB273' };
+const LET = 'ABCD';
+const $ = (id) => document.getElementById(id);
+const scr = $('scr'), stageEl = $('stage'), homeb = $('homeb'), padEl = $('pad');
+
+// ---------- 모양 계산 ----------
 const norm = (cs) => { const mx = Math.min(...cs.map((c) => c[0])), my = Math.min(...cs.map((c) => c[1])); return cs.map((c) => [c[0] - mx, c[1] - my]).sort((a, b) => a[1] - b[1] || a[0] - b[0]); };
-const rot = (cs) => norm(cs.map(([x, y]) => [-y, x]));
-const flip = (cs) => norm(cs.map(([x, y]) => [-x, y]));
+const rot = (cs) => norm(cs.map(([x, y]) => [-y, x]));        // 시계 방향 90°
+const rotN = (cs, n) => { let r = norm(cs); for (let i = 0; i < ((n % 4) + 4) % 4; i++) r = rot(r); return r; };
+const flip = (cs) => norm(cs.map(([x, y]) => [-x, y]));       // 오른쪽(왼쪽)으로 뒤집기
+const flipV = (cs) => norm(cs.map(([x, y]) => [x, -y]));      // 아래쪽(위쪽)으로 뒤집기
 const dim = (cs) => [Math.max(...cs.map((c) => c[0])) + 1, Math.max(...cs.map((c) => c[1])) + 1];
+const key = (cs) => norm(cs).map((c) => c.join(',')).join(';');
+const shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const orients = (cs) => { const m = new Map(); for (let f = 0; f < 2; f++) for (let r = 0; r < 4; r++) { const o = rotN(f ? flip(cs) : cs, r); m.set(key(o), o); } return [...m.values()]; };
+
+// 정답 1개 + 헷갈리기 쉬운 보기(prefer) + 나머지 방향에서 보기 3개
+function makeChoices(base, correct, prefer) {
+  const ck = key(correct), used = new Set([ck]), pick = [];
+  for (const p of [...prefer, ...shuffle(orients(base))]) { const k = key(p); if (!used.has(k) && pick.length < 3) { used.add(k); pick.push(norm(p)); } }
+  const opts = shuffle([norm(correct), ...pick]);
+  return { opts, ans: opts.findIndex((o) => key(o) === ck) };
+}
+
+// 조각 그림 (정사각형 상자 가운데에 놓아서, 상자를 돌리면 조각도 제자리에서 돌아감)
+function shape(cs, color, c, N, id) {
+  const g = Math.max(2, Math.round(c * .1)), u = c + g, [w, h] = dim(cs), n = N || Math.max(w, h);
+  const ox = (n - w) * u / 2, oy = (n - h) * u / 2;
+  let s = `<div class="shp"${id ? ` id="${id}"` : ''} style="width:${n * u - g}px;height:${n * u - g}px">`;
+  cs.forEach(([x, y]) => (s += `<i style="left:${ox + x * u}px;top:${oy + y * u}px;width:${c}px;height:${c}px;background:${color}"></i>`));
+  return s + '</div>';
+}
+
+// ---------- 소리 ----------
+let ac = null;
+function beep(kind) {
+  const F = { move: [[660, .04]], ok: [[660, .1], [880, .1], [1320, .1]], no: [[220, .15], [180, .15]], win: [[523, .12], [659, .12], [784, .12], [1046, .2]], whoosh: [[440, .06], [550, .06], [660, .06]] }[kind] || [[660, .05]];
+  try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); let t = ac.currentTime;
+    F.forEach(([f, l]) => { const o = ac.createOscillator(), g = ac.createGain(); o.type = 'square'; o.frequency.value = f; g.gain.value = .05; o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + l * .9); t += l; }); } catch (e) {}
+}
+
+// ---------- 상태 ----------
+let S = { scr: 'main' };
+const learned = { slide: false, turn: false, flip: false };
+let busy = false;   // 돌리기·뒤집기 움직임이 끝날 때까지 입력 잠금
+
+function setKeys(m, pad) {
+  document.querySelectorAll('.btn').forEach((b) => { const l = m[b.dataset.k] || ''; b.querySelector('span').textContent = l; b.classList.toggle('off', !l); });
+  padEl.classList.toggle('off', !pad);
+}
+function go(scr, extra) { S = Object.assign({ scr }, extra || {}); render(); }
+function goMain() { stopGame(); go('main'); }
+
+// ================= 알아보기 : 밀기 =================
+const SW = 8, SH = 6;
+const MISSIONS = [
+  { p: 0, s: [0, 0], t: [5, 3] },
+  { p: 1, s: [6, 0], t: [1, 3] },
+  { p: 2, s: [0, 2], t: [6, 0] },
+];
+const SLIDE_Q = { text: '조각을 밀었을 때 <b>달라지는 것</b>은 무엇일까요?', opts: ['모양', '위치', '방향', '크기'], ans: 1,
+  why: '밀면 <b>위치</b>만 바뀌어요. 모양·방향·크기는 그대로예요.' };
+let SL = null;
+function startSlide() { SL = { mi: 0, phase: 'move', picked: null }; loadMission(); go('slide'); }
+function loadMission() { const m = MISSIONS[SL.mi]; SL.cells = norm(PIECES[m.p].cells); SL.x = m.s[0]; SL.y = m.s[1]; SL.solved = false; SL.note = ''; }
+const dirText = (dx, dy) => { const a = []; if (dx) a.push(`${dx > 0 ? '오른쪽' : '왼쪽'}으로 <b>${Math.abs(dx)}칸</b>`); if (dy) a.push(`${dy > 0 ? '아래쪽' : '위쪽'}으로 <b>${Math.abs(dy)}칸</b>`); return a.join(', '); };
+function slideInput(k) {
+  if (SL.phase === 'move') {
+    const m = MISSIONS[SL.mi];
+    if (['UP', 'DOWN', 'LEFT', 'RIGHT'].includes(k)) {
+      if (SL.solved) return;
+      const [w, h] = dim(SL.cells), dx = { LEFT: -1, RIGHT: 1 }[k] || 0, dy = { UP: -1, DOWN: 1 }[k] || 0;
+      const nx = Math.max(0, Math.min(SW - w, SL.x + dx)), ny = Math.max(0, Math.min(SH - h, SL.y + dy));
+      if (nx === SL.x && ny === SL.y) { beep('no'); return; }
+      SL.x = nx; SL.y = ny; beep('move');
+      if (SL.x === m.t[0] && SL.y === m.t[1]) { SL.solved = true; beep('ok'); }
+      return render();
+    }
+    if (k === 'A') { loadMission(); beep('move'); return render(); }
+    if (k === 'D' && SL.solved) { SL.mi++; if (SL.mi < MISSIONS.length) loadMission(); else SL.phase = 'q'; beep('move'); return render(); }
+    return;
+  }
+  if (SL.phase === 'q') {
+    if (SL.picked === null) { const i = LET.indexOf(k); if (i >= 0) { SL.picked = i; beep(i === SLIDE_Q.ans ? 'ok' : 'no'); render(); } return; }
+    if (k === 'D') { learned.slide = true; go('sum', { mod: 'slide' }); }
+  }
+}
+function vSlide() {
+  stageEl.textContent = '밀기';
+  if (SL.phase === 'q') return vSlideQ();
+  const m = MISSIONS[SL.mi], P = PIECES[m.p];
+  const availW = scr.clientWidth - 24, availH = Math.max(150, window.innerHeight * .32);
+  const c = Math.max(24, Math.min(46, Math.floor(Math.min(availW / SW, availH / SH)) - 3));
+  const pc = new Set(SL.cells.map(([x, y]) => (SL.x + x) + ',' + (SL.y + y)));
+  const tc = new Set(SL.cells.map(([x, y]) => (m.t[0] + x) + ',' + (m.t[1] + y)));
+  const sc = new Set(SL.cells.map(([x, y]) => (m.s[0] + x) + ',' + (m.s[1] + y)));
+  let cells = '';
+  for (let y = 0; y < SH; y++) for (let x = 0; x < SW; x++) {
+    const k = x + ',' + y; let cls = 'on', st = `--pc:${P.color};`;
+    if (sc.has(k) && !pc.has(k)) cls += ' s';
+    if (tc.has(k) && !SL.solved) cls += ' t';
+    if (pc.has(k)) { cls += ' f'; st += `background:${P.color};`; }
+    cells += `<i class="${cls}" style="${st}"></i>`;
+  }
+  const dx = SL.x - m.s[0], dy = SL.y - m.s[1];
+  scr.innerHTML = `<div class="dots">${MISSIONS.map((_, i) => `<i class="${i < SL.mi ? 'on' : i === SL.mi ? 'cur' : ''}"></i>`).join('')}<i class="${''}"></i></div>
+  <div class="prompt">${SL.solved ? '도착! 모양이 바뀌었나요?' : `▲▼◀▶로 조각을 <b>밀어서</b> 점선 자리에 넣어요`}</div>
+  <div class="bw"><div class="grid" style="--c:${c}px;grid-template-columns:repeat(${SW},${c}px)">${cells}</div></div>
+  <div class="legend"><span><i style="background:${P.color};opacity:.35"></i>처음 자리</span><span><i style="outline:2px dashed var(--ink);outline-offset:-2px"></i>도착할 자리</span></div>
+  <div class="cnt">${dx || dy ? dirText(dx, dy) + ' 밀었어요' : '아직 그대로예요'}</div>
+  <div class="note good">${SL.solved ? '모양도 방향도 그대로! <b>위치</b>만 바뀌었어요' : ''}</div>`;
+  setKeys({ A: '처음 자리로', D: SL.solved ? (SL.mi < MISSIONS.length - 1 ? '다음 문제' : '퀴즈로') : '' }, !SL.solved);
+}
+function vSlideQ() {
+  const q = SLIDE_Q, p = SL.picked;
+  scr.innerHTML = `<div class="dots">${MISSIONS.map(() => '<i class="on"></i>').join('')}<i class="cur"></i></div>
+  <div class="prompt" style="margin-top:8px">${q.text}</div>
+  <div class="qrow">${shape(norm(PIECES[0].cells), PIECES[0].color, 22)}<div class="op">→<small>밀기</small></div>${shape(norm(PIECES[0].cells), PIECES[0].color, 22)}</div>
+  <div class="choices">${q.opts.map((o, i) => `<button type="button" class="ch txt${p === null ? '' : i === q.ans ? ' right' : i === p ? ' wrong' : ''}" data-i="${i}" style="--bc:var(--${LET[i]})"><span class="k">${LET[i]}</span>${o}</button>`).join('')}</div>
+  <div class="note${p === q.ans ? ' good' : ''}">${p === null ? '' : (p === q.ans ? '정답! ' : '아쉬워요. ') + q.why}</div>`;
+  scr.querySelectorAll('.ch').forEach((el) => (el.onclick = () => slideInput(LET[+el.dataset.i])));
+  setKeys(p === null ? { A: q.opts[0], B: q.opts[1], C: q.opts[2], D: q.opts[3] } : { D: '정리하기' }, false);
+}
+
+// ================= 알아보기 : 돌리기 · 뒤집기 퀴즈 =================
+function turnQs(base) {
+  return [
+    { tag: '→', small: '3칸 밀기', text: '조각을 <b>오른쪽으로 3칸 밀면</b><br>어떤 모양이 될까요?', cor: base, prefer: [flip(base), rot(base)], anim: [['slide']], verb: '밀어서 확인' },
+    { tag: '↻', small: '90°', text: '조각을 <b>시계 방향으로 90°</b> 돌리면<br>어떤 모양이 될까요?', cor: rotN(base, 1), prefer: [rotN(base, 3), flip(rotN(base, 1))], anim: [['rot', 90]], verb: '돌려서 확인' },
+    { tag: '↻', small: '180°', text: '조각을 <b>시계 방향으로 180°</b> 돌리면<br>어떤 모양이 될까요?', cor: rotN(base, 2), prefer: [flipV(base), flip(base)], anim: [['rot', 180]], verb: '돌려서 확인' },
+    { tag: '↻', small: '270°', text: '조각을 <b>시계 방향으로 270°</b> 돌리면<br>어떤 모양이 될까요?', cor: rotN(base, 3), prefer: [rotN(base, 1), flip(rotN(base, 3))], anim: [['rot', 270]], verb: '돌려서 확인' },
+    { tag: '↻', small: '360°', text: '조각을 <b>시계 방향으로 360°</b> 돌리면<br>어떤 모양이 될까요?', cor: base, prefer: [rotN(base, 2), flip(base)], anim: [['rot', 360]], verb: '돌려서 확인' },
+  ];
+}
+function flipQs(base) {
+  return [
+    { tag: '⇆', small: '오른쪽', text: '조각을 <b>오른쪽으로 뒤집으면</b><br>어떤 모양이 될까요?', cor: flip(base), prefer: [base, flipV(base)], anim: [['H']], verb: '뒤집어서 확인' },
+    { tag: '⇅', small: '아래쪽', text: '조각을 <b>아래쪽으로 뒤집으면</b><br>어떤 모양이 될까요?', cor: flipV(base), prefer: [base, flip(base)], anim: [['V']], verb: '뒤집어서 확인' },
+    { tag: '⇆', small: '왼쪽', text: '조각을 <b>왼쪽으로 뒤집으면</b><br>어떤 모양이 될까요?', cor: flip(base), prefer: [flipV(base), base], anim: [['H', -1]], verb: '뒤집어서 확인' },
+    { tag: '⇆⇆', small: '두 번', text: '조각을 <b>오른쪽으로 두 번 뒤집으면</b><br>어떤 모양이 될까요?', cor: base, prefer: [flip(base), rotN(base, 2)], anim: [['H'], ['H']], verb: '뒤집어서 확인' },
+    { tag: '⇆⇅', small: '오른쪽+아래쪽', text: '<b>오른쪽으로 뒤집고, 다시 아래쪽으로</b><br>뒤집으면 어떤 모양이 될까요?', cor: rotN(base, 2), prefer: [flip(base), flipV(base)], anim: [['H'], ['V']], verb: '뒤집어서 확인' },
+  ];
+}
+let Q = null;
+function startQuiz(mod, pi) {
+  const base = norm(PIECES[pi].cells);
+  const qs = (mod === 'turn' ? turnQs : flipQs)(base).map((q) => Object.assign(q, makeChoices(base, q.cor, q.prefer)));
+  Q = { mod, pi, base, qs, qi: 0, picked: null, score: 0, checked: false };
+  go('quiz');
+}
+function quizInput(k) {
+  const q = Q.qs[Q.qi];
+  if (Q.picked === null) { const i = LET.indexOf(k); if (i < 0) return; Q.picked = i; if (i === q.ans) { Q.score++; beep('ok'); } else beep('no'); return render(); }
+  if (k === 'A') return checkAnim();
+  if (k === 'D') {
+    Q.qi++; Q.picked = null; Q.checked = false; beep('move');
+    if (Q.qi < Q.qs.length) return render();
+    if (Q.mod === 'turn') { learned.turn = true; return go('sum', { mod: 'turn' }); }
+    return startTry();
+  }
+}
+// 처음 모양 상자를 실제로 움직여서 보여 주기
+function playSteps(el, steps, cell, done) {
+  let rz = 0, ry = 0, rx = 0, tx = 0, i = 0;
+  el.style.transition = 'none'; el.style.transform = 'none'; void el.offsetWidth;
+  const next = () => {
+    if (i >= steps.length) return setTimeout(done, 150);
+    const [t, v] = steps[i++]; let dur = .8;
+    if (t === 'slide') tx += cell * 3 * 1.1;
+    if (t === 'rot') { rz += v; dur = .45 + v / 360 * .9; }
+    if (t === 'H') ry += 180 * (v || 1);
+    if (t === 'V') rx += 180;
+    el.style.transition = `transform ${dur}s ease-in-out`;
+    el.style.transform = `translateX(${tx}px) rotate(${rz}deg) rotateX(${rx}deg) rotateY(${ry}deg)`;
+    beep('whoosh');
+    setTimeout(next, dur * 1000 + 250);
+  };
+  next();
+}
+function checkAnim() {
+  if (busy) return;
+  const q = Q.qs[Q.qi], el = $('orig'); if (!el) return;
+  busy = true; $('qnote').textContent = '잘 보세요…'; $('qnote').className = 'note good';
+  playSteps(el, q.anim, 22, () => {
+    busy = false; Q.checked = true;
+    const card = scr.querySelector(`.ch[data-i="${q.ans}"]`); if (card) { card.classList.remove('flash'); void card.offsetWidth; card.classList.add('flash'); }
+    $('qnote').innerHTML = `${q.verb.replace(' 확인', '')} 보니 <b>${LET[q.ans]}</b>와 같은 모양이 되었어요!`;
+    setKeys({ A: '한 번 더 보기', D: Q.qi < Q.qs.length - 1 ? '다음 문제' : (Q.mod === 'turn' ? '정리하기' : '직접 뒤집기') }, false);
+  });
+}
+function vQuiz() {
+  const q = Q.qs[Q.qi], P = PIECES[Q.pi], N = Math.max(...dim(Q.base)), p = Q.picked;
+  stageEl.textContent = (Q.mod === 'turn' ? '돌리기' : '뒤집기') + ` ${Q.qi + 1}/${Q.qs.length}`;
+  const cc = Math.max(11, Math.min(16, Math.floor((scr.clientWidth - 60) / 2 / (N + 1) / 1.1)));
+  scr.innerHTML = `<div class="dots">${Q.qs.map((_, i) => `<i class="${i < Q.qi ? 'on' : i === Q.qi ? 'cur' : ''}"></i>`).join('')}</div>
+  <div class="prompt">${q.text}</div>
+  <div class="qrow"><div class="ob"${q.anim[0][0] === 'slide' ? ' style="min-width:190px;align-items:flex-start"' : ''}><div class="anim">${shape(Q.base, P.color, 22, N, 'orig')}</div><small>처음 모양</small></div><div class="op">${q.tag}<small>${q.small}</small></div></div>
+  <div class="choices">${q.opts.map((o, i) => `<button type="button" class="ch${p === null ? '' : i === q.ans ? ' right' : i === p ? ' wrong' : ''}" data-i="${i}" style="--bc:var(--${LET[i]})"><span class="k">${LET[i]}</span>${shape(o, P.color, cc, N)}</button>`).join('')}</div>
+  <div class="note${p === q.ans ? ' good' : ''}" id="qnote">${p === null ? '' : p === q.ans ? `정답이에요! A를 눌러 ${q.verb}해 봐요` : `정답은 ${LET[q.ans]}예요. A를 눌러 ${q.verb}해 봐요`}</div>`;
+  scr.querySelectorAll('.ch').forEach((el) => (el.onclick = () => { if (Q.picked === null) quizInput(LET[+el.dataset.i]); }));
+  if (p === null) setKeys({ A: 'A 고르기', B: 'B 고르기', C: 'C 고르기', D: 'D 고르기' }, false);
+  else setKeys({ A: q.verb, D: Q.qi < Q.qs.length - 1 ? '다음 문제' : (Q.mod === 'turn' ? '정리하기' : '직접 뒤집기') }, false);
+}
+
+// ================= 알아보기 : 내가 뒤집어서 확인 =================
+let T = null;
+function startTry() {
+  const b = Q.base;
+  T = { pi: Q.pi, i: 0, goals: [{ t: flip(b), say: '오른쪽으로 뒤집은 모양' }, { t: flipV(b), say: '아래쪽으로 뒤집은 모양' }, { t: rotN(b, 2), say: '180° 돌린 모양 (뒤집기 두 번으로!)' }] };
+  resetTry(); go('try');
+}
+function resetTry() { T.cur = Q.base; T.moves = 0; T.ok = false; T.log = []; }
+function tryInput(k) {
+  if (busy) return;
+  if (k === 'A' && !T.ok) { resetTry(); beep('move'); return render(); }
+  if ((k === 'B' || k === 'C') && !T.ok) {
+    const el = $('tcur'); busy = true;
+    playSteps(el, [[k === 'B' ? 'H' : 'V']], 24, () => {
+      busy = false; T.cur = k === 'B' ? flip(T.cur) : flipV(T.cur); T.moves++; T.log.push(k === 'B' ? '오른쪽' : '아래쪽');
+      if (key(T.cur) === key(T.goals[T.i].t)) { T.ok = true; beep('ok'); }
+      render();
+    });
+    return;
+  }
+  if (k === 'D' && T.ok) {
+    T.i++; beep('move');
+    if (T.i < T.goals.length) { resetTry(); return render(); }
+    learned.flip = true; return go('sum', { mod: 'flip' });
+  }
+}
+function vTry() {
+  const P = PIECES[T.pi], N = Math.max(...dim(Q.base)), g = T.goals[T.i];
+  stageEl.textContent = `직접 뒤집기 ${T.i + 1}/${T.goals.length}`;
+  scr.innerHTML = `<div class="dots">${T.goals.map((_, i) => `<i class="${i < T.i ? 'on' : i === T.i ? 'cur' : ''}"></i>`).join('')}</div>
+  <div class="prompt">내가 직접 뒤집어서<br><b>${g.say}</b>을 만들어요</div>
+  <div class="tryrow"><div class="ob"><div class="anim">${shape(T.cur, P.color, 24, N, 'tcur')}</div><small>지금 조각</small></div>
+  <div class="ob tg">${shape(g.t, P.color, 24, N)}<small>만들 모양</small></div></div>
+  <div class="cnt">${T.log.length ? T.log.map((d) => d + '으로').join(' → ') + ' 뒤집었어요' : 'B·C 버튼으로 뒤집어 봐요'}</div>
+  <div class="note good">${T.ok ? (T.i === 2 ? '딱 맞아요! 오른쪽·아래쪽으로 한 번씩 뒤집으면 180° 돌린 것과 같아요' : `딱 맞아요! ${T.moves}번 뒤집었어요`) : ''}</div>`;
+  setKeys(T.ok ? { D: T.i < T.goals.length - 1 ? '다음 모양' : '정리하기' } : { A: '처음 모양으로', B: '⇆ 오른쪽으로 뒤집기', C: '⇅ 아래쪽으로 뒤집기' }, false);
+}
+
+// ================= 정리 =================
+function vSum() {
+  const m = S.mod;
+  stageEl.textContent = { slide: '밀기 정리', turn: '돌리기 정리', flip: '뒤집기 정리' }[m];
+  let row = '', pts = '', score = '';
+  if (m === 'slide') {
+    const b = norm(PIECES[0].cells), c = PIECES[0].color;
+    const st = new Set(b.map(([x, y]) => x + ',' + y)), mv = new Set(b.map(([x, y]) => (x + 4) + ',' + y));
+    let g = ''; for (let y = 0; y < 3; y++) for (let x = 0; x < 7; x++) { const k = x + ',' + y; g += `<i class="on${st.has(k) ? ' s' : ''}${mv.has(k) ? ' f' : ''}" style="--pc:${c};${mv.has(k) ? 'background:' + c : ''}"></i>`; }
+    row = `<div style="padding:10px"><div class="grid" style="--c:22px;gap:2px;grid-template-columns:repeat(7,22px)">${g}</div><small>오른쪽으로 4칸 밀기 → 모양은 그대로</small></div>`;
+    pts = '<li>밀면 <b>위치만</b> 바뀌어요.</li><li>모양, 방향, 크기는 <b>그대로</b>예요.</li><li>"오른쪽으로 3칸 밀었어요"처럼 <b>어느 쪽으로 몇 칸</b> 밀었는지 말해요.</li>';
+  } else {
+    const b = Q.base, c = PIECES[Q.pi].color, N = Math.max(...dim(b));
+    const list = m === 'turn'
+      ? [[b, '처음'], [rotN(b, 1), '↻ 90°'], [rotN(b, 2), '↻ 180°'], [rotN(b, 3), '↻ 270°'], [b, '↻ 360°']]
+      : [[b, '처음'], [flip(b), '⇆ 오른쪽'], [flipV(b), '⇅ 아래쪽'], [b, '⇆⇆ 두 번']];
+    row = list.map(([s, t]) => `<div>${shape(s, c, N > 3 ? 9 : 11, N)}<small>${t}</small></div>`).join('');
+    pts = m === 'turn'
+      ? '<li>시계 방향으로 <b>90°</b> 돌리면 위쪽이 <b>오른쪽</b>으로 가요.</li><li><b>180°</b>는 90°를 두 번 돌린 것과 같아요.</li><li><b>360°</b> 돌리면 처음 모양과 같아요.</li><li>시계 반대 방향 90° = 시계 방향 270°예요.</li>'
+      : '<li>오른쪽(왼쪽)으로 뒤집으면 <b>왼쪽과 오른쪽</b>이 바뀌어요.</li><li>아래쪽(위쪽)으로 뒤집으면 <b>위쪽과 아래쪽</b>이 바뀌어요.</li><li>같은 쪽으로 <b>두 번</b> 뒤집으면 처음 모양이 돼요.</li><li>오른쪽, 아래쪽으로 한 번씩 뒤집으면 <b>180° 돌리기</b>와 같아요.</li>';
+    score = `<div class="score">5문제 중 <b>${Q.score}</b>문제 맞혔어요</div>`;
+  }
+  scr.innerHTML = `<div class="prompt">${{ slide: '밀기', turn: '돌리기', flip: '뒤집기' }[m]}에서 알게 된 점</div>
+  ${score}<div class="sumrow">${row}</div><ul class="pts">${pts}</ul>
+  <div class="tip">도전하기에서 ▲▼◀▶ 밀기 · B 돌리기 · C 뒤집기로 퍼즐을 풀어요!</div>`;
+  setKeys({ A: '다시 하기', B: '도전하기', D: '알아보기로' }, false);
+}
+
+// ================= 첫 화면 · 알아보기 메뉴 · 조각 고르기 =================
+function vMain() {
+  stageEl.textContent = '처음 화면';
+  const n = Object.values(learned).filter(Boolean).length, w = results.filter((r) => r && r.ok).length;
+  scr.innerHTML = `<div class="menu">
+  <div class="ttl"><h2>도형의 이동</h2><p>밀기 · 돌리기 · 뒤집기로 우봉고 조각을 움직여요</p></div>
+  <button type="button" class="big" data-k="A" style="--bc:var(--A)"><span class="k">A</span><span><h3>도형의 이동 알아보기</h3><p>밀기, 돌리기, 뒤집기를 배워요</p></span>${n === 3 ? '<span class="chk">완료</span>' : ''}</button>
+  <button type="button" class="big" data-k="B" style="--bc:var(--B)"><span class="k">B</span><span><h3>도형의 이동 도전하기</h3><p>우봉고 퍼즐 5판 · 한 판 1분</p></span>${w ? `<span class="chk">${w}판 성공</span>` : ''}</button>
+  <div class="prog"><span class="${learned.slide ? 'on' : ''}">${learned.slide ? '✓' : '○'} 밀기</span><span class="${learned.turn ? 'on' : ''}">${learned.turn ? '✓' : '○'} 돌리기</span><span class="${learned.flip ? 'on' : ''}">${learned.flip ? '✓' : '○'} 뒤집기</span></div>
+  <div class="tip">알아보기를 먼저 하면 도전하기가 쉬워져요</div></div>`;
+  scr.querySelectorAll('.big').forEach((el) => (el.onclick = () => input(el.dataset.k)));
+  setKeys({ A: '알아보기', B: '도전하기' }, false);
+}
+function vLearn() {
+  stageEl.textContent = '알아보기';
+  const L = PIECES[0].cells, c = PIECES[0].color, b = norm(L);
+  const item = (k, t, d, done, ico) => `<button type="button" class="big" data-k="${k}" style="--bc:var(--${k})"><span class="k">${k}</span><span><h3>${t}</h3><p>${d}</p></span>${done ? '<span class="chk">완료</span>' : `<span class="ico">${ico}</span>`}</button>`;
+  scr.innerHTML = `<div class="menu"><div class="ttl"><h2>무엇을 알아볼까요?</h2></div>
+  ${item('A', '밀기', '조각을 밀어도 모양이 같을까?', learned.slide, shape(b, c, 9, 3))}
+  ${item('B', '돌리기', '90°, 180°, 270°, 360° 돌리면?', learned.turn, shape(rot(b), c, 9, 3))}
+  ${item('C', '뒤집기', '오른쪽·아래쪽으로 뒤집으면?', learned.flip, shape(flip(b), c, 9, 3))}
+  <div class="tip">밀기 → 돌리기 → 뒤집기 순서를 추천해요</div></div>`;
+  scr.querySelectorAll('.big').forEach((el) => (el.onclick = () => input(el.dataset.k)));
+  setKeys({ A: '밀기', B: '돌리기', C: '뒤집기', D: '처음 화면' }, false);
+}
+function vPick() {
+  stageEl.textContent = S.mod === 'turn' ? '돌리기' : '뒤집기';
+  scr.innerHTML = `<div class="menu"><div class="ttl"><h2>조각을 하나 골라요</h2><p>고른 조각으로 ${S.mod === 'turn' ? '돌리기' : '뒤집기'} 퀴즈 5문제를 풀어요</p></div>
+  ${PIECES.map((p, i) => `<button type="button" class="big" data-k="${LET[i]}" style="--bc:var(--${LET[i]})"><span class="k">${LET[i]}</span><span><h3>${p.name}</h3><p>${p.n}칸짜리 조각</p></span><span class="ico">${shape(norm(p.cells), p.color, 12, 4)}</span></button>`).join('')}</div>`;
+  scr.querySelectorAll('.big').forEach((el) => (el.onclick = () => input(el.dataset.k)));
+  setKeys({ A: PIECES[0].name, B: PIECES[1].name, C: PIECES[2].name, D: '뒤로' }, false);
+}
+
+// ================= 도전하기 (우봉고 퍼즐) =================
 function parse(p) {
   const W = Math.max(...p.map.map((r) => r.length)), H = p.map.length, on = new Set(), g = {};
   p.map.forEach((r, y) => [...r].forEach((ch, x) => { if (ch !== '.') { on.add(x + ',' + y); (g[ch] = g[ch] || []).push([x, y]); } }));
   return { W, H, on, map: p.map, pieces: Object.keys(g).sort().map((k) => ({ k, cells: norm(g[k]) })) };
 }
 const BOARDS = PUZ.map(parse);
-
-let S = { scr: 'home', sel: 0 }, results = PUZ.map(() => null), G = null, timerId = null;
-
-let ac = null;
-function beep(kind) {
-  const F = { move: [[660, .04]], ok: [[660, .1], [880, .1], [1320, .1]], no: [[220, .15], [180, .15]], win: [[523, .12], [659, .12], [784, .12], [1046, .2]] }[kind] || [[660, .05]];
-  try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); let t = ac.currentTime;
-    F.forEach(([f, l]) => { const o = ac.createOscillator(), g = ac.createGain(); o.type = 'square'; o.frequency.value = f; g.gain.value = .05; o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + l * .9); t += l; }); } catch (e) {}
-}
+let results = PUZ.map(() => null), G = null, timerId = null, gsel = 0;
 
 function miniBoard(b, m, sol) {
   let h = `<div class="mini" style="--m:${m}px;grid-template-columns:repeat(${b.W},${m}px)">`;
@@ -154,13 +494,12 @@ function miniPiece(cs, k, m) {
   for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) o += s.has(x + ',' + y) ? `<i class="p" style="background:${PC[k]}"></i>` : '<i></i>';
   return o + '</div>';
 }
-
-// ---------- 게임 ----------
+function stopGame() { clearInterval(timerId); G = null; }
 function startGame(i) {
   const b = BOARDS[i];
   G = { i, b, act: 0, lift: -1, end: Date.now() + TIME * 1000, left: TIME, note: '', good: false, over: null,
     ps: b.pieces.map((p) => { let cs = p.cells; const r = 1 + Math.floor(Math.random() * 3); for (let n = 0; n < r; n++) cs = rot(cs); if (Math.random() < .5) cs = flip(cs); return { k: p.k, cells: cs, placed: false, x: 0, y: 0 }; }) };
-  S = { scr: 'play', sel: i };
+  gsel = i; S = { scr: 'play' };
   clearInterval(timerId); timerId = setInterval(tick, 100);
   beep('ok'); render();
 }
@@ -184,10 +523,10 @@ function finish(ok) {
 function afterGame() {
   G = null;
   if (results.every(Boolean)) S = { scr: 'cert' };
-  else { const n = results.findIndex((r) => !r); S = { scr: 'home', sel: n >= 0 ? n : 0 }; }
+  else { const n = results.findIndex((r) => !r); gsel = n >= 0 ? n : 0; S = { scr: 'home' }; }
   render();
 }
-function goHome() { clearInterval(timerId); results = PUZ.map(() => null); G = null; S = { scr: 'home', sel: 0 }; render(); }
+function resetGame() { stopGame(); results = PUZ.map(() => null); gsel = 0; go('home'); }
 // 조각 고르기: 놓은 조각도 다시 골라 고칠 수 있음. 고치지 않고 지나가면 그 자리에 그대로
 function pick(next) {
   const cur = G.act, p0 = G.ps[cur];
@@ -199,23 +538,28 @@ function pick(next) {
   else { p.x = 0; p.y = 0; }
   G.act = next; clamp(p);
 }
-
-// ---------- 입력 ----------
-function input(k) {
+function gameInput(k) {
   if (S.scr === 'home') {
-    if (k === 'A' || k === 'RIGHT' || k === 'DOWN') S.sel = (S.sel + 1) % 5;
-    else if (k === 'LEFT' || k === 'UP') S.sel = (S.sel + 4) % 5;
-    else if (k === 'D') return startGame(S.sel);
+    if (k === 'A' || k === 'RIGHT' || k === 'DOWN') gsel = (gsel + 1) % 5;
+    else if (k === 'LEFT' || k === 'UP') gsel = (gsel + 4) % 5;
+    else if (k === 'D') return startGame(gsel);
     else return;
     beep('move'); return render();
   }
   if (S.scr === 'cert') {
-    if (k === 'A') { if (S.ask) return goHome(); S.ask = true; beep('no'); return render(); }
+    if (k === 'D') return goMain();
+    if (k === 'A') { if (S.ask) return resetGame(); S.ask = true; beep('no'); return render(); }
     if (S.ask) { S.ask = false; render(); }
     return;
   }
   if (!G) return;
-  if (G.over) { if (k === 'D') afterGame(); return; }
+  if (G.over === 'win') { if (k === 'D') afterGame(); return; }
+  if (G.over === 'lose') {
+    if (k === 'A') return startGame(G.i);                                   // 같은 판 다시 도전
+    if (k === 'B' && !G.showAns) { G.showAns = true; beep('move'); return render(); } // 정답 보기
+    if (k === 'D' && G.showAns) afterGame();
+    return;
+  }
   G.note = ''; G.good = false;
   const p = G.ps[G.act];
   if (k === 'UP') p.y--; else if (k === 'DOWN') p.y++; else if (k === 'LEFT') p.x--; else if (k === 'RIGHT') p.x++;
@@ -232,24 +576,18 @@ function input(k) {
   }
   beep('move'); clamp(p); render();
 }
-
-// ---------- 화면 ----------
 function stamp() { const d = new Date(), z = (v) => String(v).padStart(2, '0'); return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일 ${z(d.getHours())}:${z(d.getMinutes())}`; }
-function render() {
-  if (S.scr === 'home') return vHome();
-  if (S.scr === 'cert') return vCert();
-  vPlay();
-}
 function vHome() {
-  stageEl.textContent = '판 고르기';
+  stageEl.textContent = '도전하기';
   const done = results.filter(Boolean).length;
   scr.innerHTML = `<div class="hint">판을 누르거나 A로 고르고, D로 시작해요</div>
   <div class="boards">${BOARDS.map((b, i) => { const r = results[i];
-    return `<div class="bc${i === S.sel ? ' sel' : ''}" data-i="${i}">${i + 1}번 판${miniBoard(b, 10)}<small>${PUZ[i].level}<br>조각 ${b.pieces.length}개</small>
+    return `<div class="bc${i === gsel ? ' sel' : ''}" data-i="${i}">${i + 1}번 판${miniBoard(b, 10)}<small>${PUZ[i].level}<br>조각 ${b.pieces.length}개</small>
     ${r ? (r.ok ? `<span class="res ok">성공 ${r.used}초</span>` : '<span class="res no">도전 완료</span>') : '<span class="res yet">아직 안 함</span>'}</div>`; }).join('')}</div>
   <div class="tip">한 판에 1분 · 모두 5문제 (도전한 판 ${done}/5)</div>
-  <div class="how"><span><b>A</b> 판·조각 고르기</span><span><b>B</b> 90° 돌리기</span><span><b>C</b> 뒤집기</span><span><b>▲▼◀▶</b> 옮기기</span><span><b>D</b> 놓기·다음</span></div>`;
-  scr.querySelectorAll('.bc').forEach((el) => el.onclick = () => { const i = +el.dataset.i; if (S.sel === i) return startGame(i); S.sel = i; beep('move'); render(); });
+  <div class="how"><span><b>▲▼◀▶</b> 밀기</span><span><b>B</b> 돌리기 (시계 방향 90°)</span><span><b>C</b> 뒤집기 (오른쪽으로)</span><span><b>A</b> 조각 고르기</span><span><b>D</b> 놓기·다음</span></div>`;
+  scr.querySelectorAll('.bc').forEach((el) => (el.onclick = () => { const i = +el.dataset.i; if (gsel === i) return startGame(i); gsel = i; beep('move'); render(); }));
+  setKeys({ A: '판 고르기', D: '시작' }, true);
 }
 function vPlay() {
   const b = G.b;
@@ -269,39 +607,83 @@ function vPlay() {
   const l = G.left;
   const over = !G.over ? '' : G.over === 'win'
     ? `<div class="ov"><div class="card"><h2>성공!</h2><p>${G.i + 1}번 판을 <b>${results[G.i].used}초</b> 만에 채웠어요</p>${miniBoard(b, 26, true)}<p class="tip">${stamp()}</p><p><b>D</b> = 다음 단계</p></div></div>`
-    : `<div class="ov"><div class="card"><h2>시간 끝!</h2><p>이렇게 놓으면 딱 맞아요</p>${miniBoard(b, 26, true)}<p><b>D</b> = 다음 단계</p></div></div>`;
+    : G.showAns
+      ? `<div class="ov"><div class="card"><h2>정답</h2><p>이렇게 놓으면 딱 맞아요</p>${miniBoard(b, 26, true)}<p><b>A</b> = 다시 도전 · <b>D</b> = 다음 단계</p></div></div>`
+      : `<div class="ov"><div class="card"><h2>시간 끝!</h2><p>아쉬워요! 한 번 더 해 볼까요?</p>${miniBoard(b, 26, false)}<p><b>A</b> = 다시 도전 · <b>B</b> = 정답 보기</p>
+         <div class="choices" style="width:100%"><button type="button" class="ch txt" data-ov="A" style="--bc:var(--A)"><span class="k">A</span>다시 도전</button><button type="button" class="ch txt" data-ov="B" style="--bc:var(--B)"><span class="k">B</span>정답 보기</button></div></div></div>`;
   scr.innerHTML = `<div class="timer${l <= 10 ? ' low' : ''}"><div class="bar"><i style="width:${l / TIME * 100}%"></i></div><span class="sec">${Math.ceil(l)}초</span></div>
-  <div class="hint">방향 버튼으로 옮기고 D로 놓아요</div>
+  <div class="hint">밀고, 돌리고, 뒤집어서 판을 채워요</div>
   <div class="bw"><div class="grid" style="--c:${c}px;grid-template-columns:repeat(${b.W},${c}px)">${cells}</div></div>
   <div class="note${G.good ? ' good' : ''}">${G.note}</div>
   <div class="tray">${G.ps.map((q, j) => `<div class="pc${j === G.act ? ' act' : ''}${q.placed ? ' done' : ''}" data-j="${j}">${miniPiece(q.cells, q.k, 15)}<small>${j === G.act ? '옮기는 중' : q.placed ? '놓음' : '조각 ' + (j + 1)}</small></div>`).join('')}</div>${over}`;
-  scr.querySelectorAll('.pc').forEach((el) => el.onclick = () => { if (G && !G.over) { G.note = ''; G.good = false; pick(+el.dataset.j); beep('move'); render(); } });
+  scr.querySelectorAll('.pc').forEach((el) => (el.onclick = () => { if (G && !G.over) { G.note = ''; G.good = false; pick(+el.dataset.j); beep('move'); render(); } }));
+  scr.querySelectorAll('[data-ov]').forEach((el) => (el.onclick = () => input(el.dataset.ov)));
+  setKeys(G.over === 'win' ? { D: '다음 단계' } : G.over ? (G.showAns ? { A: '다시 도전', D: '다음 단계' } : { A: '다시 도전', B: '정답 보기' }) : { A: '조각 고르기', B: '돌리기 90°', C: '뒤집기', D: '놓기 · 다음' }, !G.over);
 }
 function vCert() {
   stageEl.textContent = '체험 확인증';
-  const ok = results.filter((r) => r.ok).length;
-  scr.innerHTML = `<div class="cert"><span class="pl">${PLACE}</span><h2>평면 우봉고 체험 확인증</h2>
-    <div class="big">5문제 중 <b>${ok}</b>문제 성공!</div>
+  const ok = results.filter((r) => r.ok).length, ln = ['slide', 'turn', 'flip'].filter((k) => learned[k]).map((k) => ({ slide: '밀기', turn: '돌리기', flip: '뒤집기' }[k]));
+  scr.innerHTML = `<div class="cert"><span class="pl">${PLACE}</span><h2>도형의 이동 · 평면 우봉고<br>체험 확인증</h2>
+    ${ln.length ? `<div class="lrn">알아보기 완료: ${ln.join(' · ')}</div>` : ''}
+    <div class="big2">5문제 중 <b>${ok}</b>문제 성공!</div>
     ${results.map((r, i) => `<div class="row">${miniBoard(BOARDS[i], 9, r.ok)}<span>${i + 1}번 판 · ${PUZ[i].level}</span><b class="${r.ok ? 'ok' : ''}">${r.ok ? `성공 ${r.used}초` : '도전 완료'}</b></div>`).join('')}
     <div class="when">${stamp()}</div></div>
   <div class="tip">이 화면을 캡처하면 확인증으로 간직할 수 있어요</div>
-  <div class="note${S.ask ? '' : ' good'}">${S.ask ? '한 번 더 A를 누르면 기록을 지우고 처음으로' : 'A 두 번 = 처음부터 다시'}</div>`;
+  <div class="note${S.ask ? '' : ' good'}">${S.ask ? '한 번 더 A를 누르면 기록을 지우고 처음부터' : 'A 두 번 = 도전 기록 지우고 다시'}</div>`;
+  setKeys({ A: S.ask ? '정말 지우기' : '다시 도전', D: '처음 화면' }, false);
 }
 
+// ================= 입력 · 화면 전환 =================
+function input(k) {
+  if (busy) return;
+  switch (S.scr) {
+    case 'main':
+      if (k === 'A') { beep('move'); return go('learn'); }
+      if (k === 'B') { beep('move'); return go('home'); }
+      return;
+    case 'learn':
+      if (k === 'A') { beep('move'); return startSlide(); }
+      if (k === 'B' || k === 'C') { beep('move'); return go('pick', { mod: k === 'B' ? 'turn' : 'flip' }); }
+      if (k === 'D') { beep('move'); return go('main'); }
+      return;
+    case 'pick': {
+      const i = LET.indexOf(k);
+      if (i >= 0 && i < PIECES.length) { beep('ok'); return startQuiz(S.mod, i); }
+      if (k === 'D') { beep('move'); return go('learn'); }
+      return;
+    }
+    case 'slide': return slideInput(k);
+    case 'quiz': return quizInput(k);
+    case 'try': return tryInput(k);
+    case 'sum':
+      if (k === 'A') { beep('move'); return S.mod === 'slide' ? startSlide() : go('pick', { mod: S.mod }); }
+      if (k === 'B') { beep('move'); return go('home'); }
+      if (k === 'D') { beep('move'); return go('learn'); }
+      return;
+    default: return gameInput(k);
+  }
+}
+function render() {
+  homeb.hidden = S.scr === 'main';
+  ({ main: vMain, learn: vLearn, pick: vPick, slide: vSlide, quiz: vQuiz, try: vTry, sum: vSum, home: vHome, play: vPlay, cert: vCert })[S.scr]();
+}
+homeb.onclick = () => { if (!busy) { beep('move'); goMain(); } };
+
 // 버튼: 누르는 즉시 반응 (꾹 누르면 방향 버튼은 계속 움직임)
-let rep = null;
+let rep = null, hold = null;
 function flash(b) { b.classList.add('hit'); setTimeout(() => b.classList.remove('hit'), 110); }
+const stopRep = () => { clearTimeout(hold); clearInterval(rep); hold = rep = null; };
 document.querySelectorAll('[data-k]').forEach((b) => {
   const k = b.dataset.k, dir = ['UP', 'DOWN', 'LEFT', 'RIGHT'].includes(k);
-  b.addEventListener('pointerdown', (e) => { e.preventDefault(); flash(b); input(k);
-    if (dir) { clearInterval(rep); const t0 = setTimeout(() => { rep = setInterval(() => input(k), 140); }, 380); rep = { clear: () => clearTimeout(t0) }; } });
-  const stop = () => { if (rep && rep.clear) rep.clear(); clearInterval(rep); rep = null; };
-  b.addEventListener('pointerup', stop); b.addEventListener('pointerleave', stop); b.addEventListener('pointercancel', stop);
+  if (!b.closest('.ctl')) return;
+  b.addEventListener('pointerdown', (e) => { e.preventDefault(); if (b.classList.contains('off') || b.closest('.off')) return; flash(b); input(k);
+    if (dir) { stopRep(); hold = setTimeout(() => { rep = setInterval(() => input(k), 140); }, 380); } });
+  b.addEventListener('pointerup', stopRep); b.addEventListener('pointerleave', stopRep); b.addEventListener('pointercancel', stopRep);
   b.addEventListener('contextmenu', (e) => e.preventDefault());
 });
 const KB = { ArrowUp: 'UP', ArrowDown: 'DOWN', ArrowLeft: 'LEFT', ArrowRight: 'RIGHT', a: 'A', b: 'B', c: 'C', d: 'D', 1: 'A', 2: 'B', 3: 'C', 4: 'D', Enter: 'D' };
 addEventListener('keydown', (e) => { const k = KB[e.key.length === 1 ? e.key.toLowerCase() : e.key]; if (k) { e.preventDefault(); input(k); } });
-addEventListener('resize', () => { if (S.scr === 'play') render(); });
+addEventListener('resize', () => { if (['play', 'slide'].includes(S.scr)) render(); });
 render();
 }
 </script>
