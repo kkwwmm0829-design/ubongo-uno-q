@@ -20,9 +20,11 @@ body{margin:0;background:var(--case2);color:var(--ink);font:16px/1.45 "Noto Sans
 .dev{max-width:520px;margin:0 auto;min-height:100%;background:var(--case);display:flex;flex-direction:column;gap:10px;
  padding:max(10px,env(safe-area-inset-top)) 12px max(14px,env(safe-area-inset-bottom))}
 .top{display:flex;align-items:center;gap:8px;color:#fff}
-.top h1{font:400 24px/1.05 Jua,sans-serif;margin:0;flex:1}
+.top h1{font:400 24px/1.05 Jua,sans-serif;margin:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top.sub h1{visibility:hidden}@media(min-width:440px){.top.sub h1{visibility:visible}}
 .homeb{border:0;background:rgba(255,255,255,.16);color:#fff;font:400 15px Jua,sans-serif;border-radius:999px;padding:6px 12px;cursor:pointer}
 .homeb[hidden]{display:none}
+@media(max-width:400px){.top h1{font-size:19px}.homeb{padding:6px 9px;font-size:14px}.chip{font-size:13px;padding:5px 9px}}
 .chip{font:400 15px Jua,sans-serif;background:rgba(255,255,255,.16);padding:5px 12px;border-radius:999px;white-space:nowrap}
 .scr{background:var(--screen);border-radius:20px;border:5px solid #062f33;box-shadow:0 6px 0 #062f33;padding:12px;flex:1;display:flex;flex-direction:column;gap:10px;position:relative;min-height:0}
 .hint{font:400 17px/1.3 Jua,sans-serif;text-align:center;min-height:1.3em}
@@ -130,7 +132,7 @@ button:focus-visible{outline:3px solid #fff;outline-offset:2px}
 </head>
 <body>
 <div class="dev">
-  <div class="top"><button type="button" class="homeb" id="homeb" hidden>⌂ 처음</button><h1>도형의 이동</h1><span class="chip" id="stage">처음 화면</span></div>
+  <div class="top"><button type="button" class="homeb" id="homeb" hidden>⌂ 처음</button><button type="button" class="homeb" id="learnb" hidden>◀ 알아보기</button><h1>도형의 이동</h1><span class="chip" id="stage">처음 화면</span></div>
   <div class="scr" id="scr"></div>
   <div class="ctl" aria-label="조작판">
     <div class="pad" id="pad">
@@ -171,7 +173,7 @@ const PIECES = [
 const PC = { A: '#F2C230', B: '#E05A5A', C: '#4F86D9', D: '#4FB273' };
 const LET = 'ABCD';
 const $ = (id) => document.getElementById(id);
-const scr = $('scr'), stageEl = $('stage'), homeb = $('homeb'), padEl = $('pad');
+const scr = $('scr'), stageEl = $('stage'), homeb = $('homeb'), learnb = $('learnb'), padEl = $('pad');
 
 // ---------- 모양 계산 ----------
 const norm = (cs) => { const mx = Math.min(...cs.map((c) => c[0])), my = Math.min(...cs.map((c) => c[1])); return cs.map((c) => [c[0] - mx, c[1] - my]).sort((a, b) => a[1] - b[1] || a[0] - b[0]); };
@@ -295,7 +297,6 @@ function vSlideQ() {
 // ================= 알아보기 : 돌리기 · 뒤집기 퀴즈 =================
 function turnQs(base) {
   return [
-    { tag: '→', small: '3칸 밀기', text: '조각을 <b>오른쪽으로 3칸 밀면</b><br>어떤 모양이 될까요?', cor: base, prefer: [flip(base), rot(base)], anim: [['slide']], verb: '밀어서 확인' },
     { tag: '↻', small: '90°', text: '조각을 <b>시계 방향으로 90°</b> 돌리면<br>어떤 모양이 될까요?', cor: rotN(base, 1), prefer: [rotN(base, 3), flip(rotN(base, 1))], anim: [['rot', 90]], verb: '돌려서 확인' },
     { tag: '↻', small: '180°', text: '조각을 <b>시계 방향으로 180°</b> 돌리면<br>어떤 모양이 될까요?', cor: rotN(base, 2), prefer: [flipV(base), flip(base)], anim: [['rot', 180]], verb: '돌려서 확인' },
     { tag: '↻', small: '270°', text: '조각을 <b>시계 방향으로 270°</b> 돌리면<br>어떤 모양이 될까요?', cor: rotN(base, 3), prefer: [rotN(base, 1), flip(rotN(base, 3))], anim: [['rot', 270]], verb: '돌려서 확인' },
@@ -430,7 +431,7 @@ function vSum() {
     pts = m === 'turn'
       ? '<li>시계 방향으로 <b>90°</b> 돌리면 위쪽이 <b>오른쪽</b>으로 가요.</li><li><b>180°</b>는 90°를 두 번 돌린 것과 같아요.</li><li><b>360°</b> 돌리면 처음 모양과 같아요.</li><li>시계 반대 방향 90° = 시계 방향 270°예요.</li>'
       : '<li>오른쪽(왼쪽)으로 뒤집으면 <b>왼쪽과 오른쪽</b>이 바뀌어요.</li><li>아래쪽(위쪽)으로 뒤집으면 <b>위쪽과 아래쪽</b>이 바뀌어요.</li><li>같은 쪽으로 <b>두 번</b> 뒤집으면 처음 모양이 돼요.</li><li>오른쪽, 아래쪽으로 한 번씩 뒤집으면 <b>180° 돌리기</b>와 같아요.</li>';
-    score = `<div class="score">5문제 중 <b>${Q.score}</b>문제 맞혔어요</div>`;
+    score = `<div class="score">${Q.qs.length}문제 중 <b>${Q.score}</b>문제 맞혔어요</div>`;
   }
   scr.innerHTML = `<div class="prompt">${{ slide: '밀기', turn: '돌리기', flip: '뒤집기' }[m]}에서 알게 된 점</div>
   ${score}<div class="sumrow">${row}</div><ul class="pts">${pts}</ul>
@@ -465,7 +466,7 @@ function vLearn() {
 }
 function vPick() {
   stageEl.textContent = S.mod === 'turn' ? '돌리기' : '뒤집기';
-  scr.innerHTML = `<div class="menu"><div class="ttl"><h2>조각을 하나 골라요</h2><p>고른 조각으로 ${S.mod === 'turn' ? '돌리기' : '뒤집기'} 퀴즈 5문제를 풀어요</p></div>
+  scr.innerHTML = `<div class="menu"><div class="ttl"><h2>조각을 하나 골라요</h2><p>고른 조각으로 ${S.mod === 'turn' ? '돌리기 퀴즈 4문제' : '뒤집기 퀴즈 5문제'}를 풀어요</p></div>
   ${PIECES.map((p, i) => `<button type="button" class="big" data-k="${LET[i]}" style="--bc:var(--${LET[i]})"><span class="k">${LET[i]}</span><span><h3>${p.name}</h3><p>${p.n}칸짜리 조각</p></span><span class="ico">${shape(norm(p.cells), p.color, 12, 4)}</span></button>`).join('')}</div>`;
   scr.querySelectorAll('.big').forEach((el) => (el.onclick = () => input(el.dataset.k)));
   setKeys({ A: PIECES[0].name, B: PIECES[1].name, C: PIECES[2].name, D: '뒤로' }, false);
@@ -665,9 +666,12 @@ function input(k) {
 }
 function render() {
   homeb.hidden = S.scr === 'main';
+  learnb.hidden = !['slide', 'pick', 'quiz', 'try', 'sum'].includes(S.scr);
+  document.querySelector('.top').classList.toggle('sub', !learnb.hidden);
   ({ main: vMain, learn: vLearn, pick: vPick, slide: vSlide, quiz: vQuiz, try: vTry, sum: vSum, home: vHome, play: vPlay, cert: vCert })[S.scr]();
 }
 homeb.onclick = () => { if (!busy) { beep('move'); goMain(); } };
+learnb.onclick = () => { if (!busy) { beep('move'); go('learn'); } };
 
 // 버튼: 누르는 즉시 반응 (꾹 누르면 방향 버튼은 계속 움직임)
 let rep = null, hold = null;
